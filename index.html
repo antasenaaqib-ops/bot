@@ -199,7 +199,7 @@ Content-Type: application/json
         }
       });
 
-      const snippet = `async function loadPrediction() {
+    const snippet = String.raw`async function loadPrediction() {
   const response = await fetch('http://localhost:8000/predict', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -215,13 +215,13 @@ Content-Type: application/json
 
   // contoh rendering sederhana
   const box = document.createElement('div');
-  box.innerHTML = `
-    <strong>${data.symbol}</strong> (${data.timeframe}) - ${data.signal}<br>
-    Entry: ${data.entry}<br>
-    TP: ${data.take_profit}<br>
-    SL: ${data.stop_loss}<br>
-    Confidence: ${Math.round(data.confidence * 100)}%
-  `;
+  box.innerHTML = \`
+    <strong>\${data.symbol}</strong> (\${data.timeframe}) - \${data.signal}<br>
+    Entry: \${data.entry}<br>
+    TP: \${data.take_profit}<br>
+    SL: \${data.stop_loss}<br>
+    Confidence: \${Math.round(data.confidence * 100)}%
+  \`;
   document.body.appendChild(box);
 }
 
