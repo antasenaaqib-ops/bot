@@ -5,6 +5,8 @@ from typing import Literal
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from requests.exceptions import RequestException
 from pydantic import BaseModel
 
 BINANCE_BASE_URL = "https://api.binance.com"
@@ -40,13 +42,26 @@ class Prediction(BaseModel):
 
 app = FastAPI(title="Crypto Predictor")
 
+# Allow browser-based clients (e.g., index.html) to call the API directly.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def _fetch_candles(symbol: str, interval: str, limit: int = 200) -> list[dict]:
-    response = requests.get(
-        f"{BINANCE_BASE_URL}/api/v3/klines",
-        params={"symbol": symbol.upper(), "interval": interval, "limit": limit},
-        timeout=10,
-    )
+    try:
+        response = requests.get(
+            f"{BINANCE_BASE_URL}/api/v3/klines",
+            params={"symbol": symbol.upper(), "interval": interval, "limit": limit},
+            timeout=10,
+        )
+    except RequestException as exc:  # network/timeout errors
+        raise HTTPException(status_code=502, detail=f"Binance request failed: {exc}") from exc
+
     if response.status_code != 200:
         raise HTTPException(
             status_code=502,
