@@ -6,6 +6,8 @@ Backend FastAPI yang menarik data candle real-time Binance, menghitung indikator
 - Python 3.10+
 - Koneksi internet (untuk memanggil API publik Binance)
 - Browser/klien frontend dapat memanggil API langsung karena CORS diizinkan untuk semua origin
+- API akan menolak request jika data candle yang dikembalikan Binance kurang dari 60 bar
+  (dibutuhkan untuk indikator SMA/RSI/ATR)
 
 ## Instalasi
 ```bash

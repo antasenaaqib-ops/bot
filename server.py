@@ -68,6 +68,19 @@ def _fetch_candles(symbol: str, interval: str, limit: int = 200) -> list[dict]:
             detail=f"Binance API error {response.status_code}: {response.text}",
         )
 
+    payload = response.json()
+    if not isinstance(payload, list):  # Binance will return dict on errors
+        raise HTTPException(
+            status_code=502,
+            detail=f"Unexpected Binance payload: {payload}",
+        )
+
+    if len(payload) < limit:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Binance returned only {len(payload)} candles (expected {limit})",
+        )
+
     return [
         {
             "open_time": int(item[0]),
@@ -130,6 +143,12 @@ def predict(body: PredictRequest) -> Prediction:
     interval = SUPPORTED_INTERVALS[body.timeframe]
     candles = _fetch_candles(body.symbol, interval)
     closes = [c["close"] for c in candles]
+
+    if len(candles) < 60:
+        raise HTTPException(
+            status_code=400,
+            detail="Binance returned insufficient candles for indicators (need >= 60)",
+        )
 
     short_sma = _sma(closes, 20)
     long_sma = _sma(closes, 50)
